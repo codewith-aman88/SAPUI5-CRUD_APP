@@ -186,40 +186,6 @@ webapp/model/models.js
 
 ---
 
-# Installation and Run
-
-### 1 Clone the repository
-
-```bash
-git clone https://github.com/codewith-aman88/SAPUI5-CRUD_APP.git
-```
-
-### 2 Navigate to the project folder
-
-```bash
-cd SAPUI5-CRUD_APP
-```
-
-### 3 Install dependencies
-
-```bash
-npm install
-```
-
-### 4 Run the application
-
-```bash
-npm start
-```
-
-or open:
-
-```
-webapp/index.html
-```
-
----
-
 # Learning Objectives
 
 This project demonstrates:
