@@ -1,0 +1,60 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+
+    <Dialog id="_IDGenDialog"
+        title="{dialog>/dialogTitle}"
+        contentWidth="480px"
+        resizable="true"
+        draggable="true">
+
+        <content>
+            <form:SimpleForm id="_IDGenSimpleForm"
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                columnsXL="1" columnsL="1" columnsM="1">
+
+                <form:content>
+                    <Label id="_IDGenLabel" text="Title" required="true"/>
+                    <Select id="_IDGenSelect" selectedKey="{dialog>/dialogTitle2}" width="100%">
+                        <items>
+                            <core:Item id="_IDGenItem1" key="Mr" text="Mr"/>
+                            <core:Item id="_IDGenItem2" key="Ms" text="Ms"/>
+                            <core:Item id="_IDGenItem3" key="Dr" text="Dr"/>
+                            <core:Item id="_IDGenItem4" key="Prof" text="Prof"/>
+                        </items>
+                   </Select>
+
+                    <Label id="_IDGenLabel1" text="First Name" required="true"/>
+                    <Input id="_IDGenInput" value="{dialog>/dialogFirstName}" placeholder="Enter first name"/>
+
+                    <Label id="_IDGenLabel2" text="Last Name" required="true"/>
+                    <Input id="_IDGenInput1" value="{dialog>/dialogLastName}" placeholder="Enter last name"/>
+
+                    <Label id="_IDGenLabel3" text="City" required="true"/>
+                    <Input id="_IDGenInput2" value="{dialog>/dialogCity}" placeholder="Enter city"/>
+
+                    <Label id="_IDGenLabel4" text="Address"/>
+                    <Input id="_IDGenInput3" value="{dialog>/dialogAddress}" placeholder="Enter address"/>
+
+                    <Label id="_IDGenLabel5" text="Register Date"/>
+                    <DatePicker id="_IDGenDatePicker" value="{dialog>/dialogRegisterDate}" valueFormat="yyyy-MM-dd" displayFormat="MMM d, yyyy"/>
+
+                    <Label id="_IDGenLabel6" text="Notes"/>
+                    <TextArea id="_IDGenTextArea" value="{dialog>/dialogNotes}" rows="3" width="100%" placeholder="Enter notes"/>
+                </form:content>
+            </form:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button id="_IDGenButton2" text="Save" type="Emphasized" press="onSaveCustomer"/>
+        </beginButton>
+        <endButton>
+            <Button id="_IDGenButton5" text="Cancel" press="onCancelDialog"/>
+        </endButton>
+
+    </Dialog>
+
+</core:FragmentDefinition>

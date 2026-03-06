@@ -1,0 +1,82 @@
+<mvc:View
+    controllerName="customer.com.ui5app.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+
+    <f:DynamicPage id="_IDGenDynamicPage">
+
+        <f:title>
+            <f:DynamicPageTitle id="_IDGenDynamicPageTitle">
+                <f:heading>
+                    <Title id="_IDGenTitle" text="{i18n>title}" />
+                </f:heading>
+
+                <f:actions>
+                    <Button id="addCustomerBtn"
+                        text="Add Customer"
+                        icon="sap-icon://add"
+                        type="Emphasized"
+                        press="onAddCustomer"/>
+                    <Button id="_IDGenButton"
+                        text="{i18n>refresh}"
+                        icon="sap-icon://refresh"
+                        press="onRefresh"/>
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <Table
+                id="customerTable"
+                items="{/Customers}"
+                mode="None">
+
+                <headerToolbar>
+                    <Toolbar id="_IDGenToolbar1">
+                        <Title id="_IDGenTitle1" text="{i18n>customerList}" level="H2"/>
+                        <ToolbarSpacer id="_IDGenToolbarSpacer"/>
+                        <SearchField id="SearchField"
+                            width="250px"
+                            liveChange="onSearch"/>
+                    </Toolbar>
+                </headerToolbar>
+
+                <columns>
+                    <Column id="_IDGenColumn2"><Text id="_IDGenText" text="Title"/></Column>
+                    <Column id="_IDGenColumn"><Text id="_IDGenText1" text="First Name"/></Column>
+                    <Column id="_IDGenColumn1"><Text id="_IDGenText2" text="Last Name"/></Column>
+                    <Column id="_IDGenColumn3"><Text id="_IDGenText3" text="City"/></Column>
+                    <Column id="actionsColumn" hAlign="End"><Text id="_IDGenText4" text="Actions"/></Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem id="_IDGenColumnListItem" type="Navigation" press="onItemPress">
+                        <cells>
+                            <Text id="_IDGenText5" text="{Title}"/>
+                            <Text id="_IDGenText6" text="{FirstName}"/>
+                            <Text id="_IDGenText7" text="{LastName}"/>
+                            <Text id="_IDGenText9" text="{City}"/>
+                            <HBox id="_IDGenHBox" justifyContent="End">
+                                <Button id="_IDGenButton3"
+                                    icon="sap-icon://edit"
+                                    type="Transparent"
+                                    tooltip="Edit Customer"
+                                    press="onEditCustomer"/>
+                                <Button id="_IDGenButton4"
+                                    icon="sap-icon://delete"
+                                    type="Transparent"
+                                    tooltip="Delete Customer"
+                                    press="onDeleteCustomer"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+        </f:content>
+
+    </f:DynamicPage>
+
+</mvc:View>
