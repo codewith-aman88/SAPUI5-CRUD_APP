@@ -9,6 +9,8 @@ sap.ui.define([
 ], function (Controller, Filter, FilterOperator, JSONModel, MessageBox, MessageToast, Fragment) {
     "use strict";
 
+    var API_BASE = "/api/customers";
+
     return Controller.extend("customer.com.ui5app.controller.View1", {
 
         onInit: function () {
@@ -23,6 +25,15 @@ sap.ui.define([
                 dialogNotes: ""
             }), "dialog");
             this._editIndex = null;
+            this._loadFromServer();
+        },
+
+        _loadFromServer: function () {
+            var oModel = this.getOwnerComponent().getModel();
+            fetch(API_BASE)
+                .then(function (r) { return r.json(); })
+                .then(function (data) { oModel.setData(data); })
+                .catch(function () { /* fallback: manifest already loaded data.json */ });
         },
 
         onSearch: function (oEvent) {
@@ -52,8 +63,7 @@ sap.ui.define([
         },
 
         onRefresh: function () {
-            var oModel = this.getOwnerComponent().getModel();
-            oModel.loadData("model/data.json", null, true);
+            this._loadFromServer();
             this.byId("customerTable").getBinding("items").filter([]);
             this.byId("SearchField").setValue("");
             MessageToast.show("Data refreshed");
@@ -61,6 +71,7 @@ sap.ui.define([
 
         onAddCustomer: function () {
             this._editIndex = null;
+            this._editCustomerId = null;
             this.getView().getModel("dialog").setData({
                 dialogTitle: "Add Customer",
                 dialogTitle2: "Mr",
@@ -82,6 +93,7 @@ sap.ui.define([
             var oCustomer = oContext.getObject();
             var aCustomers = this.getOwnerComponent().getModel().getProperty("/Customers");
             this._editIndex = aCustomers.findIndex(function (c) { return c.id === oCustomer.id; });
+            this._editCustomerId = oCustomer.id;
             this.getView().getModel("dialog").setData({
                 dialogTitle: "Edit Customer",
                 dialogTitle2: oCustomer.Title || "Mr",
@@ -103,37 +115,51 @@ sap.ui.define([
             }
             var oModel = this.getOwnerComponent().getModel();
             var aCustomers = oModel.getProperty("/Customers").slice();
+            var that = this;
+
+            var payload = {
+                Title: oData.dialogTitle2,
+                FirstName: oData.dialogFirstName.trim(),
+                LastName: oData.dialogLastName.trim(),
+                City: oData.dialogCity.trim(),
+                Address: oData.dialogAddress.trim(),
+                RegisterDate: oData.dialogRegisterDate,
+                Notes: oData.dialogNotes.trim()
+            };
 
             if (this._editIndex === null) {
-                var nMaxId = aCustomers.reduce(function (max, c) {
-                    return Math.max(max, parseInt(c.id, 10) || 0);
-                }, 0);
-                aCustomers.push({
-                    id: String(nMaxId + 1),
-                    Title: oData.dialogTitle2,
-                    FirstName: oData.dialogFirstName.trim(),
-                    LastName: oData.dialogLastName.trim(),
-                    City: oData.dialogCity.trim(),
-                    Address: oData.dialogAddress.trim(),
-                    RegisterDate: oData.dialogRegisterDate,
-                    Notes: oData.dialogNotes.trim()
+                fetch(API_BASE, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (newCustomer) {
+                    aCustomers.push(newCustomer);
+                    oModel.setProperty("/Customers", aCustomers);
+                    MessageToast.show("Customer added successfully.");
+                    that._closeDialog();
+                })
+                .catch(function () {
+                    MessageBox.error("Could not reach server. Change is only in memory.");
                 });
-                MessageToast.show("Customer added successfully.");
             } else {
-                aCustomers[this._editIndex] = Object.assign({}, aCustomers[this._editIndex], {
-                    Title: oData.dialogTitle2,
-                    FirstName: oData.dialogFirstName.trim(),
-                    LastName: oData.dialogLastName.trim(),
-                    City: oData.dialogCity.trim(),
-                    Address: oData.dialogAddress.trim(),
-                    RegisterDate: oData.dialogRegisterDate,
-                    Notes: oData.dialogNotes.trim()
+                fetch(API_BASE + "/" + this._editCustomerId, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (updated) {
+                    aCustomers[that._editIndex] = updated;
+                    oModel.setProperty("/Customers", aCustomers);
+                    MessageToast.show("Customer updated successfully.");
+                    that._closeDialog();
+                })
+                .catch(function () {
+                    MessageBox.error("Could not reach server. Change is only in memory.");
                 });
-                MessageToast.show("Customer updated successfully.");
             }
-
-            oModel.setProperty("/Customers", aCustomers);
-            this._closeDialog();
         },
 
         onDeleteCustomer: function (oEvent) {
@@ -151,13 +177,19 @@ sap.ui.define([
                 emphasizedAction: MessageBox.Action.DELETE,
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.DELETE) {
-                        var aCustomers = oModel.getProperty("/Customers").slice();
-                        var nIdx = aCustomers.findIndex(function (c) { return c.id === oCustomer.id; });
-                        if (nIdx > -1) {
-                            aCustomers.splice(nIdx, 1);
-                            oModel.setProperty("/Customers", aCustomers);
-                            MessageToast.show(sName + " deleted.");
-                        }
+                        fetch(API_BASE + "/" + oCustomer.id, { method: "DELETE" })
+                        .then(function () {
+                            var aList = oModel.getProperty("/Customers").slice();
+                            var nIdx = aList.findIndex(function (c) { return c.id === oCustomer.id; });
+                            if (nIdx > -1) {
+                                aList.splice(nIdx, 1);
+                                oModel.setProperty("/Customers", aList);
+                                MessageToast.show(sName + " deleted.");
+                            }
+                        })
+                        .catch(function () {
+                            MessageBox.error("Could not reach server. Change is only in memory.");
+                        });
                     }
                 }
             });

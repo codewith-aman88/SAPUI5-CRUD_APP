@@ -7,6 +7,8 @@ sap.ui.define([
 ], function (Controller, JSONModel, MessageBox, MessageToast, Fragment) {
     "use strict";
 
+    var API_BASE = "/api/customers";
+
     return Controller.extend("customer.com.ui5app.controller.View2", {
 
         onInit: function () {
@@ -35,6 +37,7 @@ sap.ui.define([
             var nIdx = aCustomers.findIndex(function (c) { return c.id === sId; });
             if (nIdx > -1) {
                 this._currentIndex = nIdx;
+                this._currentId = sId;
                 this.getView().bindElement("/Customers/" + nIdx);
             }
         },
@@ -66,7 +69,9 @@ sap.ui.define([
             }
             var oModel = this.getOwnerComponent().getModel();
             var aCustomers = oModel.getProperty("/Customers").slice();
-            aCustomers[this._currentIndex] = Object.assign({}, aCustomers[this._currentIndex], {
+            var that = this;
+
+            var payload = {
                 Title: oData.dialogTitle2,
                 FirstName: oData.dialogFirstName.trim(),
                 LastName: oData.dialogLastName.trim(),
@@ -74,17 +79,31 @@ sap.ui.define([
                 Address: oData.dialogAddress.trim(),
                 RegisterDate: oData.dialogRegisterDate,
                 Notes: oData.dialogNotes.trim()
+            };
+
+            fetch(API_BASE + "/" + this._currentId, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (updated) {
+                aCustomers[that._currentIndex] = updated;
+                oModel.setProperty("/Customers", aCustomers);
+                that.getView().bindElement("/Customers/" + that._currentIndex);
+                MessageToast.show("Customer updated successfully.");
+                that._closeDialog();
+            })
+            .catch(function () {
+                MessageBox.error("Could not reach server. Change is only in memory.");
             });
-            oModel.setProperty("/Customers", aCustomers);
-            this.getView().bindElement("/Customers/" + this._currentIndex);
-            MessageToast.show("Customer updated successfully.");
-            this._closeDialog();
         },
 
         onDeleteCustomer: function () {
             var oModel = this.getOwnerComponent().getModel();
             var oCustomer = oModel.getProperty("/Customers/" + this._currentIndex);
             var sName = [oCustomer.Title, oCustomer.FirstName, oCustomer.LastName].filter(Boolean).join(" ");
+            var that = this;
 
             MessageBox.confirm("Are you sure you want to delete " + sName + "?", {
                 title: "Confirm Delete",
@@ -92,13 +111,19 @@ sap.ui.define([
                 emphasizedAction: MessageBox.Action.DELETE,
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.DELETE) {
-                        var aCustomers = oModel.getProperty("/Customers").slice();
-                        aCustomers.splice(this._currentIndex, 1);
-                        oModel.setProperty("/Customers", aCustomers);
-                        MessageToast.show(sName + " deleted.");
-                        this.getOwnerComponent().getRouter().navTo("RouteView1");
+                        fetch(API_BASE + "/" + oCustomer.id, { method: "DELETE" })
+                        .then(function () {
+                            var aList = oModel.getProperty("/Customers").slice();
+                            aList.splice(that._currentIndex, 1);
+                            oModel.setProperty("/Customers", aList);
+                            MessageToast.show(sName + " deleted.");
+                            that.getOwnerComponent().getRouter().navTo("RouteView1");
+                        })
+                        .catch(function () {
+                            MessageBox.error("Could not reach server. Change is only in memory.");
+                        });
                     }
-                }.bind(this)
+                }
             });
         },
 
