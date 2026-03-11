@@ -11,13 +11,10 @@
   "dependencies": {
     "express": "^4.18.2"
   },
-  "devDependencies": {
-    "@ui5/cli": "^4.0.33",
-    "@sap/ux-ui5-tooling": "1"
-  },
+  "devDependencies": {},
   "scripts": {
     "start-server": "node server.js",
-    "start": "fiori run --open \"test/flp.html#app-preview\"",
+    "start": "node server.js",
     "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
     "build": "ui5 build --config=ui5.yaml --clean-dest --dest dist",
     "deploy": "fiori verify",
@@ -27,5 +24,8 @@
     "start-variants-management": "fiori run --open \"/preview.html#app-preview\"",
     "unit-test": "fiori run --open \"test/unit/unitTests.qunit.html\""
   },
-  "sapuxLayer": "CUSTOMER_BASE"
+  "sapuxLayer": "CUSTOMER_BASE",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

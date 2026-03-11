@@ -17,13 +17,25 @@ sap.ui.define([
             // Device model
             this.setModel(new JSONModel(Device), "device");
 
-            // JSON model
+            // Load data from backend API (persists to disk)
+            // Falls back to data.json if API not available
             var oModel = new JSONModel();
-            oModel.loadData(
-                sap.ui.require.toUrl("customer/com/ui5app/model/data.json")
-            );
-            this.setModel(oModel);
+            var that = this;
 
+            fetch("/api/customers")
+                .then(function (r) {
+                    if (!r.ok) throw new Error("API error");
+                    return r.json();
+                })
+                .then(function (data) {
+                    oModel.setData(data);
+                })
+                .catch(function () {
+                    // Fallback: load directly from file
+                    oModel.loadData("model/data.json");
+                });
+
+            this.setModel(oModel);
             this.getRouter().initialize();
         }
 
